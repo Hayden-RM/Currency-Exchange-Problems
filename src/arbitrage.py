@@ -1,34 +1,87 @@
 import math
 from typing import List, Optional, Tuple
-from .floyd_warshall import floyd_warshall, any_negative_cycle, reconstruct_cycle_from_fw  
+from .bellman_ford import bellman_ford_single_source
 from .transform import rates_to_neglog_weights
 
-def cycle_profit(R: List[List[float]], cyc: List[int]) -> float:
 
-    n = len(cyc)
+def _cycle_profit(R: List[List[float]], cyc: List[int]) -> float:
     prod = 1.0
-    for i in range(n):
-        u = cyc[i]
-        v = cyc[(i + 1) % n]
+    m = len(cyc)
+    for k in range(m):
+        u = cyc[k]
+        v = cyc[(k + 1) % m]
         prod *= R[u][v]
-
     return prod
 
-def detect_arbitrage(R: List[List[float]], eps: float = 1e-12, tol: float = 1e-12) -> Optional[Tuple[List[int], float]]:
-
-    W = _rates_to_neglog_weights(R, eps)
-    dist, nxt = floyd_warshall(W)
-    s = any_negative_cycle(dist, tol=tol)
-    if s is None:
+def _best_simple_cycle_from_closed_walk(walk: List[int], R: List[List[float]]
+                                        ) -> Optional[Tuple[List[int], float]]:
+    """
+    Given a closed walk (not necessarily explicitly closed), examine ALL repeated
+    vertices v_i == v_j (i < j) and treat walk[i:j] as a candidate simple cycle.
+    Return the cycle with the highest true profit and its profit.
+    """
+    if not walk:
         return None
+    # ensure explicit closure when scanning (makes last candidate well-formed)
+    closed = list(walk)
+    if closed[0] != closed[-1]:
+        closed.append(closed[0])
 
-    cyc = reconstruct_cycle_from_fw(nxt, s)
-    if not cyc or len(cyc) < 2:
-        cycc = [i]
+    positions = {}
+    best_cyc: Optional[List[int]] = None
+    best_profit = 1.0
 
-    
+    for idx, v in enumerate(closed):
+        if v not in positions:
+            positions[v] = []
+        positions[v].append(idx)
 
-    profit = cycle_profit(R, cyc)
-    return True, cyc, profit
+    # for every vertex that appears multiple times, try all (i, j) pairs
+    for _, idxs in positions.items():
+        if len(idxs) < 2:
+            continue
+        for a in range(len(idxs) - 1):
+            for b in range(a + 1, len(idxs)):
+                i, j = idxs[a], idxs[b]
+                # candidate cycle is closed[i:j], drop duplicate end
+                cyc = closed[i:j]
+                if len(cyc) < 2:
+                    continue
+                profit = _cycle_profit(R, cyc)
+                if profit > best_profit:
+                    best_profit = profit
+                    best_cyc = cyc
 
+    if best_cyc is None:
+        return None
+    return best_cyc, best_profit
 
+def detect_arbitrage(R: List[List[float]], eps: float = 1e-12, tol: float = 1e-10
+                     ) -> Tuple[bool, Optional[List[int]], Optional[float]]:
+    """
+    Detect arbitrage by running Bellman-Ford from every source and collecting
+    any negative cycles reachable from that source. Return the most profitable
+    simple cycle found (by true product in R).
+    """
+    W = rates_to_neglog_weights(R, eps=eps)
+    n = len(R)
+
+    best_cycle: Optional[List[int]] = None
+    best_profit = 1.0
+
+    # Run BF from each source to detect reachable negative cycles
+    for s in range(n):
+        dist, pred, cycle = bellman_ford_single_source(W, s, tol=tol)
+        if cycle is None:
+            continue
+        # cycle is returned as list of nodes in forward order via pred-unwind
+        # convert to simple cycle (in case pred-based reconstruction produced order quirks)
+        # Compute profit directly and update best
+        profit = _cycle_profit(R, cycle)
+        if profit > best_profit:
+            best_profit = profit
+            best_cycle = cycle
+
+    if not best_cycle:
+        return False, None, None
+    return True, best_cycle, best_profit
