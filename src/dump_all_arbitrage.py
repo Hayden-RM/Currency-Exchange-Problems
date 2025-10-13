@@ -1,3 +1,4 @@
+# src/dump_all_arbitrage.py
 """Brute-force enumerator for small exchange graphs.
 
 This module provides `dump_all_arbitrage(R, labels, ...)` which prints all

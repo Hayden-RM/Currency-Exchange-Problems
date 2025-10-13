@@ -1,3 +1,4 @@
+# src/bellman_ford.py
 """Bellman–Ford implementation (single-source) and negative-cycle reconstruction.
 
 This module provides `bellman_ford_single_source(W, s)` which runs the dense

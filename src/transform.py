@@ -1,3 +1,4 @@
+# src/transform.py
 """transform.py
 
 Small helpers that transform exchange-rate matrices into graph weights and

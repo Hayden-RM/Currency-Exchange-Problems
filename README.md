@@ -50,7 +50,7 @@ Test files are plain text. Example structure:
 - First line: `n, LABEL1, LABEL2, ..., LABELn` where `n` is the number of currencies.
 - Next `n` lines: each contains `n` whitespace-separated positive floats describing the exchange-rate matrix R where `R[i][j]` is the rate from currency i to j. Diagonal elements are typically `1.0`.
 
-Files in `tests/` follow this format and are used by `run_all_tests`.
+Files in `tests_given/` follow this format and are used by `run_all_tests`.
 
 ## What the program prints
 

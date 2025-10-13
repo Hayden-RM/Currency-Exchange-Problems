@@ -1,3 +1,4 @@
+# src/arbitrage.py
 """arbitrage.py
 
 Utilities for detecting arbitrage cycles in an exchange-rate matrix R.

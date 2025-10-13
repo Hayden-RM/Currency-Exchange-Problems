@@ -1,3 +1,4 @@
+# src/runner.py
 """Runner utilities: read test files, detect arbitrage and print results.
 
 Primary entry point: run_case(input_file) — used by `main.py` to process tests.

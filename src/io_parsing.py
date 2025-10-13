@@ -1,3 +1,4 @@
+# src/io_parsing.py
 """Input parsing utilities for plain-text exchange-rate matrix files.
 
 Exposes `read_matrix_file(path)` which returns (labels, R) where `labels` is

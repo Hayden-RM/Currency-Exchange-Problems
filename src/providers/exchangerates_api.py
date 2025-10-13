@@ -1,11 +1,8 @@
 # src/providers/exchangerates_api.py
 from __future__ import annotations
-import os
-import time
+import os, requests, time 
 import datetime as dt
 from typing import Dict, Iterable, Optional, Tuple
-
-import requests
 from requests.adapters import HTTPAdapter, Retry
 from dotenv import load_dotenv
 
@@ -39,7 +36,7 @@ class ExchangeRatesClient:
             total=5,
             backoff_factor=0.3,
             status_forcelist=(429, 500, 502, 503, 504),
-            allowed_methods=frozenset({"GET"}) 
+            allowed_methods=frozenset({"GET"})
         )
         self.sess.mount("https://", HTTPAdapter(max_retries=retries))
         self._cache: Dict[Tuple[str, Tuple[Tuple[str, str], ...]], Tuple[float, dict]] = {}
