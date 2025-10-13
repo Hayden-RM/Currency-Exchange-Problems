@@ -13,7 +13,7 @@ def _cycle_profit(R: List[List[float]], cyc: List[int]) -> float:
         prod *= R[u][v]
     return prod
 
-def _best_simple_cycle_from_closed_walk(walk: List[int], R: List[List[float]]
+def _best_simple_cycle_from_closed_walk(walk: List[int], R: List[List[float]], profit_tol: float = 1e-12
                                         ) -> Optional[Tuple[List[int], float]]:
     """
     Given a closed walk (not necessarily explicitly closed), examine ALL repeated
@@ -48,7 +48,7 @@ def _best_simple_cycle_from_closed_walk(walk: List[int], R: List[List[float]]
                 if len(cyc) < 2:
                     continue
                 profit = _cycle_profit(R, cyc)
-                if profit > best_profit:
+                if profit > 1.0 + abs(profit_tol) and profit > best_profit:
                     best_profit = profit
                     best_cyc = cyc
 

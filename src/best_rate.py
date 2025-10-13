@@ -2,6 +2,7 @@
 import math
 from typing import List, Optional, Tuple
 
+
 INF = 1e300
 
 def _path_product(R: List[List[float]], path: List[int]) -> float:
@@ -159,3 +160,4 @@ def best_conversion(
     else:
         # dist[t] is total −log(rate)
         return math.exp(-dist[t]), path
+
