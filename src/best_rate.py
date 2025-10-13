@@ -1,11 +1,20 @@
-# src/best_rate.py
+"""best_rate.py
+
+Utilities to compute the best conversion rate between two currencies
+using shortest-path algorithms in -log space.
+
+Public function: best_conversion(R, s, t, ...)
+"""
+
 import math
 from typing import List, Optional, Tuple
 
 
 INF = 1e300
 
+
 def _path_product(R: List[List[float]], path: List[int]) -> float:
+    """Multiply real rates along a discrete path (product of R[u->v])."""
     prod = 1.0
     for i in range(len(path) - 1):
         u, v = path[i], path[i + 1]

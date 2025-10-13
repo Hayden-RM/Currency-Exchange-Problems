@@ -1,3 +1,9 @@
+"""Convenience execution helpers used by top-level scripts.
+
+Provides small utilities to run all tests in a directory, run a single test,
+and to run a live demo that fetches data from an exchange-rates provider.
+"""
+
 import os
 from src.runner import run_case
 

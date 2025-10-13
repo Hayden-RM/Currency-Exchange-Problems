@@ -1,6 +1,9 @@
-# src/runner.py
-import math
-import time
+"""Runner utilities: read test files, detect arbitrage and print results.
+
+Primary entry point: run_case(input_file) — used by `main.py` to process tests.
+"""
+
+import time 
 from src.io_parsing import read_matrix_file, ParseError
 from src.arbitrage import detect_arbitrage
 from src.best_rate import best_conversion

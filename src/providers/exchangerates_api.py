@@ -39,7 +39,7 @@ class ExchangeRatesClient:
             total=5,
             backoff_factor=0.3,
             status_forcelist=(429, 500, 502, 503, 504),
-            allowed_methods=False,  # retry on all (GETs mainly)
+            allowed_methods=frozenset({"GET"}) 
         )
         self.sess.mount("https://", HTTPAdapter(max_retries=retries))
         self._cache: Dict[Tuple[str, Tuple[Tuple[str, str], ...]], Tuple[float, dict]] = {}

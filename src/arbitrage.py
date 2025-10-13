@@ -1,3 +1,11 @@
+"""arbitrage.py
+
+Utilities for detecting arbitrage cycles in an exchange-rate matrix R.
+
+This module exposes a single high-level function `detect_arbitrage(R, ...)`
+which returns whether an arbitrage exists and the best simple cycle found.
+"""
+
 import math
 from typing import List, Optional, Tuple
 from .bellman_ford import bellman_ford_single_source
@@ -5,6 +13,11 @@ from .transform import rates_to_neglog_weights
 
 
 def _cycle_profit(R: List[List[float]], cyc: List[int]) -> float:
+    """Return the multiplicative profit for a simple cycle.
+
+    R: exchange-rate matrix
+    cyc: nodes in cycle order [u0,u1,...,uk] representing edges u0->u1->...->uk->u0
+    """
     prod = 1.0
     m = len(cyc)
     for k in range(m):
@@ -32,18 +45,15 @@ def _best_simple_cycle_from_closed_walk(walk: List[int], R: List[List[float]], p
     best_profit = 1.0
 
     for idx, v in enumerate(closed):
-        if v not in positions:
-            positions[v] = []
-        positions[v].append(idx)
+        positions.setdefault(v, []).append(idx)
 
-    # for every vertex that appears multiple times, try all (i, j) pairs
+    # For every repeated vertex, try all (i,j) pairs to extract candidate simple cycles
     for _, idxs in positions.items():
         if len(idxs) < 2:
             continue
         for a in range(len(idxs) - 1):
             for b in range(a + 1, len(idxs)):
                 i, j = idxs[a], idxs[b]
-                # candidate cycle is closed[i:j], drop duplicate end
                 cyc = closed[i:j]
                 if len(cyc) < 2:
                     continue

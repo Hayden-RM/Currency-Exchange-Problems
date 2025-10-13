@@ -1,8 +1,13 @@
+"""Brute-force enumerator for small exchange graphs.
+
+This module provides `dump_all_arbitrage(R, labels, ...)` which prints all
+simple arbitrage cycles found by exhaustive search. Intended for debugging
+and validation on small `n` (e.g., n <= 6).
+"""
+
 from typing import List, Tuple, Optional, Set
 
-# =========================
-# Public entry point
-# =========================
+
 def dump_all_arbitrage(
     R: List[List[float]],
     labels: List[str],

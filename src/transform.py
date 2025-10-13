@@ -1,25 +1,37 @@
-# src/transform.py
+"""transform.py
+
+Small helpers that transform exchange-rate matrices into graph weights and
+back. The canonical transform used by the algorithms in this repository is
+`W[i][j] = -log(R[i][j])` which converts multiplicative rates to additive
+weights so shortest-path algorithms can be used.
+"""
 
 import math
 from typing import List, Dict
 
-def rates_to_neglog_weights(R: List[List[float]], eps: float = 0.0) -> List[List[float]]:
 
+def rates_to_neglog_weights(R: List[List[float]], eps: float = 0.0) -> List[List[float]]:
+    """Convert an n×n rate matrix R into -log weights matrix W.
+
+    eps: epsilon guard for nonpositive entries (if present).
+    """
     n = len(R)
     W = [[0.0] * n for _ in range(n)]
     for i in range(n):
         for j in range(n):
-            W[i][j] = -math.log(R[i][j] + eps)
+            if i == j:
+                W[i][j] = 0.0
+            else:
+                r = R[i][j]
+                W[i][j] = -math.log(r if r > 0.0 else max(r, eps))
     return W
 
-def matrix_from_base_snapshot(base: str, rates: Dict[str, float], labels: List[str]) -> List[List[float]]:
-    """
-    Build an n×n matrix R where R[i][j] is the rate labels[i] -> labels[j],
-    given a snapshot with a single base and a dict of base->quote rates.
 
-    - base: the base currency of the snapshot (e.g., "USD")
-    - rates: mapping QUOTE -> rate(base->QUOTE)
-    - labels: ordered currency list you want in the matrix
+def matrix_from_base_snapshot(base: str, rates: Dict[str, float], labels: List[str]) -> List[List[float]]:
+    """Build an n×n rate matrix R from a single-base snapshot.
+
+    Useful adapter for API responses that report rates relative to a single
+    base currency.
     """
     base = base.upper()
     labels = [s.upper() for s in labels]
@@ -28,7 +40,6 @@ def matrix_from_base_snapshot(base: str, rates: Dict[str, float], labels: List[s
     if base not in labels:
         raise ValueError(f"Base {base} must be included in labels")
 
-    # base->X map (include base->base = 1.0)
     base_to = {base: 1.0, **{k.upper(): float(v) for k, v in rates.items()}}
 
     R = [[0.0] * n for _ in range(n)]
@@ -38,7 +49,6 @@ def matrix_from_base_snapshot(base: str, rates: Dict[str, float], labels: List[s
         for j, dst in enumerate(labels):
             if i == j:
                 continue
-            # src->dst = (base->dst) / (base->src), when both exist
             b_src = base_to.get(src)
             b_dst = base_to.get(dst)
             if b_src and b_dst:

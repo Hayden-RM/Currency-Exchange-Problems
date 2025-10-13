@@ -1,4 +1,9 @@
-# src/io_parsing.py
+"""Input parsing utilities for plain-text exchange-rate matrix files.
+
+Exposes `read_matrix_file(path)` which returns (labels, R) where `labels` is
+an ordered list of currency names and `R` is the n×n exchange-rate matrix.
+"""
+
 from typing import List, Tuple, Optional
 
 class ParseError(Exception):

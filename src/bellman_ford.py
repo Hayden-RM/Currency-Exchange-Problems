@@ -1,18 +1,31 @@
+"""Bellman–Ford implementation (single-source) and negative-cycle reconstruction.
+
+This module provides `bellman_ford_single_source(W, s)` which runs the dense
+Bellman–Ford algorithm on the weight matrix `W` (n×n) starting from source `s`.
+
+Return value:
+  (dist, pred, cycle)
+  - dist: list[float] distances from s
+  - pred: list[Optional[int]] predecessor index for each node
+  - cycle: Optional[list[int]] a simple negative cycle (forward order) if one
+    is reachable from s, otherwise None.
+"""
+
 from typing import List, Optional, Tuple
-import math
+import logging
 
 INF = 1e300
 
-def bellman_ford_single_source(W: List[List[float]], s: int, tol: float = 1e-12) -> Tuple[List[float], List[Optional[int]], Optional[List[int]]]:
-    """
-    Run Bellman-Ford from source s on weight matrix W.
 
-    Returns (dist, pred, cycle) where:
-      - dist: distances from s
-      - pred: predecessor list (index or None)
-      - cycle: a simple negative cycle as a list of node indices (in forward order),
-               or None if no negative cycle reachable from s.
+def bellman_ford_single_source(W: List[List[float]], s: int, tol: float = 1e-12) -> Tuple[List[float], List[Optional[int]], Optional[List[int]]]:
+    """Run Bellman–Ford on dense weight matrix `W` from source `s`.
+
+    The function also attempts to reconstruct one negative cycle reachable from
+    `s` (if any) and returns it in forward order. `tol` controls numeric
+    tolerance for relaxations.
     """
+
+    logging.debug("[probe] BF entered")
     n = len(W)
     dist: List[float] = [INF] * n
     pred: List[Optional[int]] = [None] * n
@@ -32,6 +45,7 @@ def bellman_ford_single_source(W: List[List[float]], s: int, tol: float = 1e-12)
                 w = W[u][v]
                 alt = du + w
                 if alt < dist[v] - abs(tol):
+                    logging.debug(f"relax u={u} -> v={v}: {dist[v]:.6g} -> {alt:.6g} pred[{v}]={u}")
                     dist[v] = alt
                     pred[v] = u
                     updated = True
