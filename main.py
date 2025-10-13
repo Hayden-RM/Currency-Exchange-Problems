@@ -10,6 +10,9 @@ def main() -> None:
     # --> Run the given test cases <--
     run_all_tests("tests_given")
 
+    # --> Run the extra test cases <-- 
+    # run_all_tests("tests_extra")
+
     # --> if necessary, you can run a single test like this: <--
     # run_single_test("tests_given/tc_arb_c1.txt")
 

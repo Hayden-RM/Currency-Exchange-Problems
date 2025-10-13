@@ -158,6 +158,10 @@ def best_conversion(
     # Try predecessor chain first
     path = _reconstruct_path_pred(pred, s, t)
 
+    if path is None:
+    # dense tables in assignment always have a direct edge
+        return R[s][t], [s, t]
+
     # If pred chain is thin, try distance-consistent reconstruction
     if not path or (len(path) < 2 and s != t):
         path = _reconstruct_path_consistent(dist, W, s, t, tol=1e-8)

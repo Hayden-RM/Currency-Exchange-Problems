@@ -5,6 +5,7 @@ Primary entry point: run_case(input_file) — used by `main.py` to process tests
 """
 
 import time 
+from typing import Optional
 from src.io_parsing import read_matrix_file, ParseError
 from src.arbitrage import detect_arbitrage
 from src.best_rate import best_conversion
@@ -41,6 +42,7 @@ def run_case(input_file: str, eps: float = 1e-12, tol: float = 1e-12) -> None:
     exists, cyc, prof = detect_arbitrage(R, eps=eps, tol=tol)
 
     if exists and cyc:
+        cyc = _rotate_cycle_to_start(cyc, start_idx=0, labels=labels)
         cyc_labels = [labels[i] for i in cyc] + [labels[cyc[0]]]
         profit_pct = (prof - 1.0) * 100 if prof else 0
         print("Arbitrage detected!")
@@ -71,3 +73,23 @@ def run_case(input_file: str, eps: float = 1e-12, tol: float = 1e-12) -> None:
         print("Best conversion rate from {0} to {1}: N/A".format(labels[s], labels[t]))
 
     _print_exec_time(start_ns)
+
+def _rotate_cycle_to_start(cyc: list[int], start_idx: Optional[int], labels: list[str]) -> list[int]:
+    """
+    Rotate a simple cycle [u0,u1,...,uk] so it starts at:
+      - start_idx (if provided and present in the cycle), else
+      - the lexicographically smallest label (stable tie-break).
+      - For peace of mind, so arb cycle matches expected output format, although arb cycle is circular anyway.
+    """
+    if not cyc:
+        return cyc[:]
+    m = len(cyc)
+
+    # Preferred start
+    if start_idx is not None and start_idx in cyc:
+        k = cyc.index(start_idx)
+        return cyc[k:] + cyc[:k]
+
+    # Otherwise pick smallest label to be stable
+    k = min(range(m), key=lambda i: labels[cyc[i]])
+    return cyc[k:] + cyc[:k]
