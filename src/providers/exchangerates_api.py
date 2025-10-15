@@ -77,12 +77,12 @@ class ExchangeRatesClient:
                 labels = [base_label] + [k for k in sorted(rates.keys()) if k != base_label]
                 R = matrix_from_latest(data, labels)
 
-                out_dir = Path.cwd() / "latest_data_from_api"
+                out_dir = Path.cwd() / "tests/latest_data_from_api"
                 out_dir.mkdir(parents=True, exist_ok=True)
                 out_path = out_dir / "latest.txt"
 
                 # Write a simple textual format: first line `n, L1, L2, ...`, then rows
-                with out_path.open("w", encoding="utf-8") as fw:
+                with out_path.open("a", encoding="utf-8") as fw:
                     fw.write(f"{len(labels)}, " + ", ".join(labels) + "\n")
                     for row in R:
                         fw.write(" ".join(f"{v:.12g}" for v in row) + "\n")
